@@ -40,7 +40,7 @@ Washington State AMI and treatment values (27.14% prevalence, 23.88% received tr
 
 ### Treatment Gap by State — Top 20 (Washington highlighted)
 
-![Top 20 States by Treatment Gap](outputs/fig1_treatment_gap_ranking.png)
+![Top 20 States by Treatment Gap](fig1_treatment_gap_ranking.png)
 
 Nevada, Wyoming, and Idaho top the ranking with gaps above 7%. Washington sits at 17th — meaningfully above the national midpoint, and above its regional neighbors Oregon (10th) and Idaho (3rd).
 
@@ -48,7 +48,7 @@ Nevada, Wyoming, and Idaho top the ranking with gaps above 7%. Washington sits a
 
 ### Washington State vs. National Average
 
-![WA vs National Average](outputs/fig2_wa_vs_national.png)
+![WA vs National Average](fig2_wa_vs_national.png)
 
 Washington's higher AMI prevalence (27.14% vs. 23.00% nationally) is not matched by a proportionally higher treatment rate, widening the gap relative to the national average. This pattern is consistent with SAMHSA's finding that high-prevalence states do not necessarily achieve higher treatment penetration.
 
@@ -56,7 +56,7 @@ Washington's higher AMI prevalence (27.14% vs. 23.00% nationally) is not matched
 
 ### Washington County HPSA Scores — Top 10 (Yakima highlighted)
 
-![WA County HPSA Scores](outputs/fig3_yakima_hpsa_rank.png)
+![WA County HPSA Scores](fig3_yakima_hpsa_rank.png)
 
 Yakima County's HPSA score of 19 places it second in Washington, trailing only Ferry County (score 20). Scores above 16 qualify for federal designation as high-priority shortage areas, triggering eligibility for NHSC loan repayment and J-1 visa waivers — both relevant to CCBHC provider recruitment context.
 
