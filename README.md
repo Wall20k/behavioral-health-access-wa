@@ -40,7 +40,7 @@ Washington State AMI and treatment values (27.14% prevalence, 23.88% received tr
 
 ### Treatment Gap by State — Top 20 (Washington highlighted)
 
-![Top 20 States by Treatment Gap](outputs/fig1_treatment_gap_ranking.png)
+![Top 20 States by Treatment Gap](outputs/FIG1_T~1.PNG)
 
 Nevada, Wyoming, and Idaho top the ranking with gaps above 7%. Washington sits at 17th — meaningfully above the national midpoint, and above its regional neighbors Oregon (10th) and Idaho (3rd).
 
