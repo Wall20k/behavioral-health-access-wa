@@ -1,7 +1,6 @@
 # Behavioral Health Treatment Gap Analysis — Washington State
 
-**Author:** Waleed Adawi &nbsp;·&nbsp; 
-**Year:** 2026  
+**Author:** Waleed Adawi &nbsp;·&nbsp; **Year:** 2026  
 **Stack:** Python 3 · SQLite · pandas · matplotlib  
 **Data:** SAMHSA NSDUH 2021–2022 · HRSA Health Professional Shortage Areas
 
