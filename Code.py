@@ -637,7 +637,7 @@ def fig6_mh_vs_sud_gaps(d):
     ax.grid(axis='y', alpha=0.5, zorder=1)
 
     ax.text(0.98, 0.97,
-            'SUD gap is consistently\n3–5× larger than MH gap',
+            'SUD gap is consistently\n2–5× larger than MH gap',
             transform=ax.transAxes, ha='right', va='top', fontsize=8.5, color='#636E72',
             bbox=dict(boxstyle='round,pad=0.35', facecolor='white', edgecolor='#DFE6E9', alpha=0.9))
 
