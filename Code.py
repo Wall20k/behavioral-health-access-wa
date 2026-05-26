@@ -672,19 +672,24 @@ def fig7_unmet_need_ranking(d):
     bars = ax.barh(range(n), un_vals[::-1],
                    color=colors[::-1], alpha=0.88, edgecolor='white', linewidth=0.5, zorder=2)
 
-    # Value labels
-    for i, val in enumerate(un_vals[::-1]):
-        ax.text(val + 0.25, i, f'{val:.1f}%', va='center', fontsize=8.5, color=C_DARK)
+    wa_val  = un_vals[-1] if not wa_in_top else un_vals[un_states.index('Washington')]
+    wa_rank = sorted_idx.index(wa_idx) + 1
+
+    # Value labels — skip Washington (gets its own annotation below)
+    for i, (val, state) in enumerate(zip(un_vals[::-1], un_states[::-1])):
+        if state != 'Washington':
+            ax.text(val + 0.25, i, f'{val:.1f}%', va='center', fontsize=8.5, color=C_DARK)
 
     # Separator + annotation for Washington if appended
     if not wa_in_top:
-        # Washington is last in un_states, first in reversed = position 0
         ax.axhline(0.5, color='#95A5A6', lw=1.2, linestyle=':', zorder=1)
-        wa_val = un_vals[-1]
-        wa_rank = sorted_idx.index(wa_idx) + 1
-        ax.text(wa_val + 0.25, 0,
-                f'  WA (rank #{wa_rank} nationally)',
-                va='center', fontsize=8, color=C_AMBER, fontweight='bold')
+        # Annotation box below the bar — offset left so it doesn't overlap legend
+        ax.annotate(f'51.2% — Rank #{wa_rank} nationally',
+                    xy=(wa_val, 0), xytext=(wa_val - 18, -0.45),
+                    fontsize=9, fontweight='bold', color=C_AMBER,
+                    arrowprops=dict(arrowstyle='->', color=C_AMBER, lw=1.2),
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='#FFF3E0',
+                              edgecolor=C_AMBER, alpha=0.95))
 
     ax.set_yticks(range(n))
     ax.set_yticklabels(un_states[::-1], fontsize=9.5)
@@ -702,9 +707,9 @@ def fig7_unmet_need_ranking(d):
 
     wa_patch  = mpatches.Patch(color=C_AMBER, label='Washington (focus state)')
     oth_patch = mpatches.Patch(color=C_BLUE,  label='Other states')
-    ax.legend(handles=[wa_patch, oth_patch], fontsize=9, loc='lower right')
+    ax.legend(handles=[wa_patch, oth_patch], fontsize=9, loc='upper right')
     ax.grid(axis='x', alpha=0.5, zorder=1)
-    ax.set_xlim(0, max(un_vals) + 5)
+    ax.set_xlim(0, max(un_vals) + 8)   # extra right margin for value labels
     ax.tick_params(axis='y', length=0)
 
     plt.tight_layout()
