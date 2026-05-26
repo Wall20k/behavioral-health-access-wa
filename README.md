@@ -56,7 +56,7 @@ Washington's higher AMI prevalence (27.14% vs. 23.00% nationally) is not matched
 
 ### Washington County HPSA Scores — Top 10 (Yakima highlighted)
 
-![WA County HPSA Scores](outputs/FIG3_Y~1.PNG)
+![WA County HPSA Scores](outputs/fig3_yakima_hpsa_rank.png)
 
 Yakima County's HPSA score of 19 places it second in Washington, trailing only Ferry County (score 20). Scores above 16 qualify for federal designation as high-priority shortage areas, triggering eligibility for NHSC loan repayment and J-1 visa waivers — both relevant to CCBHC provider recruitment context.
 
