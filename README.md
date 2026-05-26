@@ -48,7 +48,7 @@ Nevada, Wyoming, and Idaho top the ranking with gaps above 7%. Washington sits a
 
 ### Washington State vs. National Average
 
-![WA vs National Average](outputs/FIG2_W~1.PNG)
+![WA vs National Average](outputs/fig2_wa_vs_national.png)
 
 Washington's higher AMI prevalence (27.14% vs. 23.00% nationally) is not matched by a proportionally higher treatment rate, widening the gap relative to the national average. This pattern is consistent with SAMHSA's finding that high-prevalence states do not necessarily achieve higher treatment penetration.
 
