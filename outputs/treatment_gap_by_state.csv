@@ -1,4 +1,4 @@
-state,ami_prevalence_pct,ami_received_treatment_pct,treatment_gap_pct,gap_rank
+state,ami_prevalence_pct,ami_received_treatment_pct,mh_gap_pp,gap_rank
 Nevada,24.88,16.22,8.66,1
 Wyoming,24.22,16.11,8.11,2
 Idaho,23.11,15.67,7.44,3
