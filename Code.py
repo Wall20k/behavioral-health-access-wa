@@ -657,36 +657,78 @@ def fig7_unmet_need_ranking(d):
 
 
 def fig8_hpsa_bubble(hpsa_rows):
-    """Bubble chart: WA county HPSA score vs population."""
-    counties = [r[0].replace(' County','') for r in hpsa_rows]
+    """Redesigned bubble chart: county HPSA score vs population, sorted by score."""
+    counties = [r[0].replace(' County', '') for r in hpsa_rows]
     scores   = [r[1] for r in hpsa_rows]
     pops     = [r[2] for r in hpsa_rows]
     max_pop  = max(pops)
 
-    pop_scale = [p / max_pop * 1800 + 80 for p in pops]
-    b_colors  = [C_WA if c == 'Yakima' else (C_RED if s >= 16 else C_BLUE)
+    # Sort by score ascending so highest scores appear at the TOP
+    order    = sorted(range(len(counties)), key=lambda i: scores[i])
+    counties = [counties[i] for i in order]
+    scores   = [scores[i] for i in order]
+    pops     = [pops[i]    for i in order]
+
+    pop_scale = [max(60, p / max_pop * 2200) for p in pops]
+    b_colors  = ['#E74C3C' if c == 'Yakima'
+                 else (C_RED if s >= 16 else C_BLUE)
                  for c, s in zip(counties, scores)]
 
-    fig, ax = plt.subplots(figsize=(11, 7))
-    ax.scatter(scores, range(len(counties)),
-               s=pop_scale, c=b_colors, alpha=0.75,
-               edgecolors='white', linewidths=0.8, zorder=3)
+    n   = len(counties)
+    fig, ax = plt.subplots(figsize=(12, n * 0.42 + 2))
 
-    ax.set_yticks(range(len(counties)))
-    ax.set_yticklabels(counties, fontsize=9)
-    ax.axvline(16, color=C_AMBER, lw=1.8, linestyle='--', zorder=2,
-               label='High-priority threshold (≥ 16)')
-    ax.set_xlabel('HPSA Score (0–25)', fontsize=11)
-    ax.set_title('Washington State Mental Health HPSA Scores\nBubble size = designated population',
-                 fontsize=12, fontweight='bold', color=C_DARK, pad=14)
+    # Alternating row shading for readability
+    for i in range(0, n, 2):
+        ax.axhspan(i - 0.5, i + 0.5, color='#EEF2F5', zorder=0, linewidth=0)
 
-    for pop_k, label in [(50000,'50K'),(150000,'150K'),(300000,'300K')]:
-        size = pop_k / max_pop * 1800 + 80
-        ax.scatter([], [], s=size, c=C_GREY, label=f'Pop: {label}', alpha=0.7, edgecolors='white')
+    ax.scatter(scores, range(n), s=pop_scale, c=b_colors,
+               alpha=0.82, edgecolors='white', linewidths=0.9, zorder=3)
 
-    ax.legend(fontsize=8.5, framealpha=0.9, loc='lower right')
-    ax.grid(axis='x', alpha=0.6)
-    ax.set_xlim(4, 26)
+    # Y-axis county labels — bold & red for Yakima
+    ax.set_yticks(range(n))
+    ax.set_yticklabels(counties, fontsize=9.5)
+    for lbl, county in zip(ax.get_yticklabels(), counties):
+        if county == 'Yakima':
+            lbl.set_fontweight('bold')
+            lbl.set_color('#C0392B')
+
+    # Threshold line — annotated directly, NOT in the legend
+    ax.axvline(16, color=C_AMBER, lw=2.0, linestyle='--', zorder=2, alpha=0.9)
+    ax.text(16.25, 1.0, '≥ 16\nHigh-priority', fontsize=8.5,
+            color='#D35400', va='bottom', linespacing=1.4)
+
+    ax.set_xlabel('HPSA Score  (higher score = greater shortage, max 25)', fontsize=11)
+    ax.set_title('Washington State Counties — Mental Health HPSA Scores',
+                 fontsize=13, fontweight='bold', color=C_DARK, pad=14)
+    ax.tick_params(axis='y', length=0)
+    ax.grid(axis='x', alpha=0.35, linestyle=':')
+    ax.set_xlim(3.5, 27)
+    ax.set_ylim(-0.8, n - 0.2)
+
+    # ── Two clean legend groups ──────────────────────────────────────────────
+    # 1) Color legend (priority level)
+    color_handles = [
+        mpatches.Patch(facecolor=C_RED,     label='High-priority shortage (score ≥ 16)'),
+        mpatches.Patch(facecolor=C_BLUE,    label='Standard shortage (score < 16)'),
+        mpatches.Patch(facecolor='#E74C3C', label='Yakima County (focus area)'),
+    ]
+    leg1 = ax.legend(handles=color_handles, title='Priority Level',
+                     loc='lower right', fontsize=8.5, title_fontsize=9,
+                     framealpha=0.95, edgecolor='#CCCCCC',
+                     bbox_to_anchor=(1.0, 0.0))
+    ax.add_artist(leg1)
+
+    # 2) Bubble-size legend
+    size_handles = []
+    for pop_k, lbl in [(50_000, '50 K'), (150_000, '150 K'), (300_000, '300 K')]:
+        sz = max(60, pop_k / max_pop * 2200)
+        size_handles.append(
+            ax.scatter([], [], s=sz, c=C_GREY, alpha=0.75,
+                       edgecolors='white', label=f'Pop: {lbl}'))
+    ax.legend(handles=size_handles, title='Designated Population',
+              loc='lower right', fontsize=8.5, title_fontsize=9,
+              framealpha=0.95, edgecolor='#CCCCCC',
+              bbox_to_anchor=(1.0, 0.30))
 
     plt.tight_layout()
     path = OUT_DIR + 'fig8_hpsa_bubble.png'
