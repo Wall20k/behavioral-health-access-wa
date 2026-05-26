@@ -136,3 +136,10 @@ CCBHCs are required under federal certification standards (42 CFR Part 2 and SAM
 - **Query 5** produces the county-level HPSA documentation that CCBHCs in shortage areas — including Yakima — submit to HRSA and SAMHSA as part of workforce planning, NHSC site applications, and annual progress reports.
 
 This project demonstrates the end-to-end data work a CCBHC Data Quality Analyst performs: sourcing authoritative federal datasets, building a clean and auditable data environment, running validated SQL-based analysis, and producing outputs that directly support grant compliance and program planning.
+
+
+## License
+
+Code is licensed under the [MIT License](LICENSE). Non-code content (visualizations, analysis, and documentation) is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
+
+© 2026 Waleed Adawi. You may share and adapt with attribution for non-commercial purposes.
