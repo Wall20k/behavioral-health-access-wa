@@ -675,21 +675,19 @@ def fig7_unmet_need_ranking(d):
     wa_val  = un_vals[-1] if not wa_in_top else un_vals[un_states.index('Washington')]
     wa_rank = sorted_idx.index(wa_idx) + 1
 
-    # Value labels — skip Washington (gets its own annotation below)
+    # Value labels — all states including Washington
     for i, (val, state) in enumerate(zip(un_vals[::-1], un_states[::-1])):
-        if state != 'Washington':
+        if state == 'Washington':
+            # Bold rank label placed INSIDE the bar (left-aligned)
+            ax.text(2, i, f'{val:.1f}%  —  Rank #31 nationally',
+                    va='center', fontsize=9, color='white',
+                    fontweight='bold')
+        else:
             ax.text(val + 0.25, i, f'{val:.1f}%', va='center', fontsize=8.5, color=C_DARK)
 
-    # Separator + annotation for Washington if appended
+    # Separator line before Washington if appended
     if not wa_in_top:
         ax.axhline(0.5, color='#95A5A6', lw=1.2, linestyle=':', zorder=1)
-        # Annotation box below the bar — offset left so it doesn't overlap legend
-        ax.annotate(f'51.2% — Rank #{wa_rank} nationally',
-                    xy=(wa_val, 0), xytext=(wa_val - 18, -0.45),
-                    fontsize=9, fontweight='bold', color=C_AMBER,
-                    arrowprops=dict(arrowstyle='->', color=C_AMBER, lw=1.2),
-                    bbox=dict(boxstyle='round,pad=0.3', facecolor='#FFF3E0',
-                              edgecolor=C_AMBER, alpha=0.95))
 
     ax.set_yticks(range(n))
     ax.set_yticklabels(un_states[::-1], fontsize=9.5)
