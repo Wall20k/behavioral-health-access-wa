@@ -30,7 +30,7 @@ This project builds a normalized SQLite database from two federal datasets, exec
 
 ### Fig 1 — Treatment Gap by State: Top 20 (Washington Highlighted)
 
-![Top 20 States by Treatment Gap](outputs/fig1_treatment_gap_ranking.png)
+![Top 20 States by Treatment Gap](outputs/FIG1_T~1.PNG)
 
 Nevada, Wyoming, and Idaho lead the ranking with gaps above 7%, reflecting a combination of high rural provider shortages and limited state behavioral health infrastructure. Washington sits at rank 17 — well above the national midpoint of 2.2% — and above both of its Pacific Northwest neighbors: Oregon ranks 10th (gap: 4.7%) and Idaho ranks 3rd (gap: 7.4%).
 
