@@ -578,35 +578,63 @@ def fig5_gap_distribution(d):
 
 
 def fig6_mh_vs_sud_gaps(d):
-    """Grouped bar: MH vs SUD gaps for top 12 states by MH gap."""
+    """Grouped bar: MH vs SUD gaps — top 11 states + Washington always included."""
     states  = d['state']
     mh_gap  = d['mh_gap']
     sud_gap = d['sud_gap']
 
-    sorted_idx = sorted(range(len(states)), key=lambda i: mh_gap[i], reverse=True)[:12]
-    top_states = [states[i] for i in sorted_idx]
-    top_mh     = [mh_gap[i] for i in sorted_idx]
-    top_sud    = [sud_gap[i] for i in sorted_idx]
+    # Top 11 by MH gap, then force-append Washington if not already present
+    sorted_idx = sorted(range(len(states)), key=lambda i: mh_gap[i], reverse=True)
+    top_idx = sorted_idx[:11]
+    wa_idx  = states.index('Washington')
+    if wa_idx not in top_idx:
+        top_idx = top_idx + [wa_idx]   # Washington appended at the right
 
-    fig, ax = plt.subplots(figsize=(13, 7))
+    top_states = [states[i] for i in top_idx]
+    top_mh     = [mh_gap[i]  for i in top_idx]
+    top_sud    = [sud_gap[i] for i in top_idx]
+
+    mh_colors  = [C_AMBER if s == 'Washington' else C_BLUE for s in top_states]
+    sud_colors = [C_AMBER if s == 'Washington' else C_RED  for s in top_states]
+
+    fig, ax = plt.subplots(figsize=(14, 7))
     x = np.arange(len(top_states))
     w = 0.38
 
-    bar_mh  = ax.bar(x - w/2, top_mh,  w, label='Mental Health Gap',     color=C_BLUE,  alpha=0.88, zorder=2)
-    bar_sud = ax.bar(x + w/2, top_sud, w, label='Substance Use Disorder Gap', color=C_RED, alpha=0.88, zorder=2)
+    bar_mh  = ax.bar(x - w/2, top_mh,  w, color=mh_colors,  alpha=0.88,
+                     label='Mental Health Gap', zorder=2, edgecolor='white', linewidth=0.4)
+    bar_sud = ax.bar(x + w/2, top_sud, w, color=sud_colors, alpha=0.88,
+                     label='Substance Use Disorder Gap', zorder=2, edgecolor='white', linewidth=0.4)
 
-    for i, s in enumerate(top_states):
-        if s == 'Washington':
-            bar_mh[i].set_facecolor(C_AMBER)
-            bar_sud[i].set_facecolor(C_AMBER)
+    # Label WA bars directly
+    wa_pos = top_states.index('Washington')
+    ax.annotate(f'WA\n(MH: {top_mh[wa_pos]:.1f} pp\nSUD: {top_sud[wa_pos]:.1f} pp)',
+                xy=(x[wa_pos], top_sud[wa_pos] + 0.2),
+                xytext=(x[wa_pos] - 1.1, top_sud[wa_pos] + 1.8),
+                fontsize=8.5, fontweight='bold', color=C_AMBER,
+                arrowprops=dict(arrowstyle='->', color=C_AMBER, lw=1.3))
+
+    # Separator line before Washington if it was appended
+    if wa_idx not in sorted_idx[:11]:
+        ax.axvline(x[wa_pos] - 0.55, color='#95A5A6', lw=1.2, linestyle=':', zorder=1)
+        ax.text(x[wa_pos] - 0.52, ax.get_ylim()[1] * 0.01, 'WA (rank 17)',
+                fontsize=7.5, color='#7F8C8D', rotation=90, va='bottom')
 
     ax.set_xticks(x)
     ax.set_xticklabels([s.replace(' ', '\n') for s in top_states], fontsize=8.5)
     ax.set_ylabel('Treatment Gap (percentage points)', fontsize=11)
-    ax.set_title('Mental Health vs. Substance Use Disorder Treatment Gaps\nTop 12 States by MH Gap',
+    ax.set_title('Mental Health vs. Substance Use Disorder Treatment Gaps\nTop 11 States by MH Gap + Washington',
                  fontsize=13, fontweight='bold', color=C_DARK, pad=14)
-    ax.legend(fontsize=10)
-    ax.grid(axis='y', alpha=0.6, zorder=1)
+
+    # Legend: colors + WA marker
+    wa_patch = mpatches.Patch(color=C_AMBER, label='Washington (focus state)')
+    leg_handles = [
+        mpatches.Patch(color=C_BLUE,  label='Mental Health Gap'),
+        mpatches.Patch(color=C_RED,   label='Substance Use Disorder Gap'),
+        wa_patch,
+    ]
+    ax.legend(handles=leg_handles, fontsize=9.5, framealpha=0.95)
+    ax.grid(axis='y', alpha=0.5, zorder=1)
 
     ax.text(0.98, 0.97,
             'SUD gap is consistently\n3–5× larger than MH gap',
@@ -621,33 +649,63 @@ def fig6_mh_vs_sud_gaps(d):
 
 
 def fig7_unmet_need_ranking(d):
-    """Horizontal bar: AMI unmet need % — top 20 states."""
+    """Horizontal bar: AMI unmet need % — top 19 states + Washington always shown."""
     states    = d['state']
     ami_unmet = d['ami_unmet']
 
-    sorted_idx = sorted(range(len(states)), key=lambda i: ami_unmet[i], reverse=True)[:20]
-    un_states  = [states[i] for i in sorted_idx]
-    un_vals    = [ami_unmet[i] for i in sorted_idx]
-    colors     = [C_WA if s == 'Washington' else C_BLUE for s in un_states]
+    sorted_idx = sorted(range(len(states)), key=lambda i: ami_unmet[i], reverse=True)
+    wa_idx     = states.index('Washington')
+    top_idx    = sorted_idx[:19]
+    wa_in_top  = wa_idx in top_idx
 
-    fig, ax = plt.subplots(figsize=(9, 8))
-    bars = ax.barh(range(len(un_states)), un_vals[::-1],
-                   color=colors[::-1], alpha=0.88, edgecolor='white', linewidth=0.5)
+    if not wa_in_top:
+        top_idx = top_idx + [wa_idx]   # Washington appended at the bottom (lowest value)
 
-    for i, (bar, val) in enumerate(zip(bars, un_vals[::-1])):
-        ax.text(val + 0.3, i, f'{val:.1f}%', va='center', fontsize=8.5, color=C_DARK)
+    un_states = [states[i] for i in top_idx]
+    un_vals   = [ami_unmet[i] for i in top_idx]
+    colors    = [C_AMBER if s == 'Washington' else C_BLUE for s in un_states]
 
-    ax.set_yticks(range(len(un_states)))
-    ax.set_yticklabels(un_states[::-1], fontsize=9)
+    n = len(un_states)
+    fig, ax = plt.subplots(figsize=(10, n * 0.42 + 1.5))
+
+    # Reversed so highest is at the top
+    bars = ax.barh(range(n), un_vals[::-1],
+                   color=colors[::-1], alpha=0.88, edgecolor='white', linewidth=0.5, zorder=2)
+
+    # Value labels
+    for i, val in enumerate(un_vals[::-1]):
+        ax.text(val + 0.25, i, f'{val:.1f}%', va='center', fontsize=8.5, color=C_DARK)
+
+    # Separator + annotation for Washington if appended
+    if not wa_in_top:
+        # Washington is last in un_states, first in reversed = position 0
+        ax.axhline(0.5, color='#95A5A6', lw=1.2, linestyle=':', zorder=1)
+        wa_val = un_vals[-1]
+        wa_rank = sorted_idx.index(wa_idx) + 1
+        ax.text(wa_val + 0.25, 0,
+                f'  WA (rank #{wa_rank} nationally)',
+                va='center', fontsize=8, color=C_AMBER, fontweight='bold')
+
+    ax.set_yticks(range(n))
+    ax.set_yticklabels(un_states[::-1], fontsize=9.5)
+
+    # Bold + color Washington label
+    for lbl, s in zip(ax.get_yticklabels(), un_states[::-1]):
+        if s == 'Washington':
+            lbl.set_fontweight('bold')
+            lbl.set_color(C_AMBER)
+
     ax.set_xlabel('Adults with AMI Who Did NOT Receive Treatment (%)', fontsize=10)
-    ax.set_title('Unmet Mental Health Need — Top 20 States\n(% of people with AMI who go without treatment)',
+    title_suffix = 'Top 19 States + Washington' if not wa_in_top else 'Top 20 States'
+    ax.set_title(f'Unmet Mental Health Need — {title_suffix}\n(% of people with AMI who go without treatment)',
                  fontsize=12, fontweight='bold', color=C_DARK, pad=14)
 
-    wa_label  = mpatches.Patch(color=C_WA,   label='Washington')
-    oth_label = mpatches.Patch(color=C_BLUE,  label='Other states')
-    ax.legend(handles=[wa_label, oth_label], fontsize=9, loc='lower right')
-    ax.grid(axis='x', alpha=0.6)
-    ax.set_xlim(0, max(un_vals) + 4)
+    wa_patch  = mpatches.Patch(color=C_AMBER, label='Washington (focus state)')
+    oth_patch = mpatches.Patch(color=C_BLUE,  label='Other states')
+    ax.legend(handles=[wa_patch, oth_patch], fontsize=9, loc='lower right')
+    ax.grid(axis='x', alpha=0.5, zorder=1)
+    ax.set_xlim(0, max(un_vals) + 5)
+    ax.tick_params(axis='y', length=0)
 
     plt.tight_layout()
     path = OUT_DIR + 'fig7_unmet_need_ranking.png'
