@@ -1,8 +1,10 @@
-# Behavioral Health Treatment Gap Analysis — Washington State
+# Youth Mental Health Access Analysis — Washington State
 
-**Author:** Waleed Adawi &nbsp;·&nbsp; **Year:** 2026  
-**Stack:** Python 3 · SQLite · numpy · matplotlib  
-**Data:** SAMHSA NSDUH 2021–2022 · HRSA Health Professional Shortage Areas (Q2 FY2026)
+County-level analysis of youth mental health access gaps, provider shortages, and socioeconomic risk factors across all 39 Washington counties.
+
+**Author:** Waleed Adawi · **Year:** 2026
+**Internship:** Washington State Community Connectors (WSCC) · Spring 2026
+**Stack:** Python 3 · pandas · NumPy · Matplotlib · Seaborn
 
 ---
 
@@ -10,40 +12,38 @@
 
 ### The Problem
 
-Millions of Americans who meet clinical criteria for a mental health condition never receive treatment. This is not a knowledge gap — it is a structural one: not enough providers, not enough affordable care, and not enough geographic access, particularly in rural and agricultural communities. The result is a measurable treatment gap: the difference between how many people have a diagnosable mental health condition and how many actually receive care.
+Rural and low-income communities in Washington State face disproportionate barriers to youth mental health care. Provider shortages, high uninsured rates among children, and poverty create compounding access gaps that vary dramatically from county to county.
 
 ### Why It Matters
 
-For state health agencies and federally-funded behavioral health clinics — especially Certified Community Behavioral Health Clinics (CCBHCs), which are required to document treatment access and unmet need as a condition of federal certification — quantifying this gap is not optional. It drives grant applications, workforce planning, and program justification. A CCBHC Data Quality Analyst's core function is to produce exactly this kind of analysis: taking authoritative federal datasets, loading them into a clean and auditable data environment, and generating outputs that can be submitted to HRSA and SAMHSA.
+Washington has 39 counties spanning dense urban centers like King County (2.3M residents, 380 MH providers per 100K) to remote rural areas like Garfield County (2,200 residents, 40 providers per 100K). Understanding where access breaks down — and what drives those gaps — is the first step toward equitable resource allocation.
+
+This project was developed during a Spring 2026 internship with Washington State Community Connectors (WSCC), an organization that works to bridge gaps in health and social services across Washington's rural and underserved communities. The analysis produces the kind of evidence-based outputs that can support WSCC program planning, grant narrative development, and advocacy.
 
 ### Objective
 
-This project quantifies the behavioral health treatment gap at the state level across all 50 states and DC, then zooms into Washington State — with particular focus on Yakima County, one of the most severely shortage-designated mental health areas in the state. The analysis uses two federal datasets, five SQL-based queries, and eight visualizations to answer:
-
-1. Where does Washington rank nationally for unmet mental health need?
-2. How does Washington's treatment gap compare to the national average — and what drives the difference?
-3. How severe is the provider shortage in Yakima County relative to the rest of Washington?
-4. Do federal agency claims about behavioral health access hold up against the data?
+Quantify the relationships between socioeconomic indicators (income, poverty, insurance coverage), mental health outcomes (youth diagnosis rates, sadness prevalence, adult mental health burden, child maltreatment), and mental health provider availability at the county level. Identify the most underserved communities and classify counties into risk profiles using unsupervised clustering.
 
 ---
 
 ## Methodology
 
-The project follows a standard data quality analyst workflow: source → load → audit → analyze → communicate.
+### Approach
 
-**Step 1 — Data Sourcing.** Two authoritative federal datasets were identified: SAMHSA's NSDUH 2021–2022 Model-Based State Prevalence Estimates (providing state-level mental health and substance use metrics for all 50 states and DC) and HRSA's HPSA Designation Database (providing county-level Mental Health Professional Shortage Area scores for Washington). Washington-specific values were sourced from SAMHSA's state-specific PDF (`NSDUHsaeWashington2022.pdf`, Tables 106A/106B) to ensure maximum precision using the Small Area Estimation hierarchical Bayes methodology.
+This analysis uses a single self-contained Python script with all county-level data embedded directly. No external CSV files or databases are required — the data dictionary is built into `Code.py` for full reproducibility.
 
-**Step 2 — Database Design.** A normalized SQLite database was built with two tables: `nsduh_state` (51 rows, 8 behavioral health metrics per state) and `hrsa_shortage` (30 rows, Washington county-level HPSA designations). SQLite was chosen for portability and to demonstrate relational database competency without infrastructure dependencies.
+The analytical pipeline includes descriptive statistics across all 39 counties, distribution analysis of key variables, rural vs. urban disparity comparisons, Pearson correlation analysis between all indicator pairs, a manually implemented K-means clustering algorithm (k=3, no scikit-learn) to classify counties into risk profiles, and a hex cartogram for geographic visualization.
 
-**Step 3 — Data Quality Audit.** Before running any analysis, a programmatic audit was executed via SQL (`Query 4`) to verify zero null values, zero out-of-bounds percentages, and complete coverage across all 51 records. This mirrors the pre-submission audit a CCBHC Data Quality Analyst runs before filing federal grant reports.
+### Tools
 
-**Step 4 — SQL-Based Analysis.** Five queries were executed against the database covering: MH treatment gap ranking (all 51 jurisdictions), Washington vs. national comparison, combined MH and SUD gap analysis for the ten highest-gap states, the data quality audit, and Washington county-level HPSA rankings.
+| Tool | Purpose |
+|------|---------|
+| pandas | Data manipulation and summary statistics |
+| NumPy | Array operations and K-means implementation |
+| Matplotlib | All figure generation (11 outputs) |
+| Seaborn | Correlation heatmap styling |
 
-**Step 5 — Exploratory Data Analysis.** Eight visualizations were produced covering distributions, scatterplots, grouped comparisons, bubble charts, and ranked bars. Each chart was designed to communicate a specific finding to both technical and non-technical audiences.
-
-**Step 6 — Validation and Communication.** Stated claims from SAMHSA, HRSA, Washington State, and the CCBHC program were located in official documentation and cross-referenced against the data to confirm, qualify, or contextualize each claim.
-
-**Tools:** Python 3 · SQLite · numpy · matplotlib · SAMHSA NSDUH SAE methodology · HRSA HPSA scoring framework
+No external machine learning libraries (scikit-learn, scipy, etc.) are used. The K-means algorithm is implemented from scratch using NumPy for educational transparency.
 
 ---
 
@@ -51,269 +51,238 @@ The project follows a standard data quality analyst workflow: source → load �
 
 ### Data Sources
 
-| Dataset | Source | Access Date |
-|---|---|---|
-| NSDUH 2021–2022 Model-Based State Prevalence Estimates | [SAMHSA](https://www.samhsa.gov/data/report/2021-2022-nsduh-state-prevalence-estimates) | May 2026 |
-| Washington State NSDUH Tables 106A/106B (exact SAE figures) | [NSDUHsaeWashington2022.pdf](https://www.samhsa.gov/data/sites/default/files/reports/rpt42728/NSDUHsaeWashington2022.pdf) | May 2026 |
-| Mental Health HPSA Designations — Washington County-Level | [HRSA BCD_HPSA_FCT_DET_MH](https://data.hrsa.gov/data/download?data=SHORT) | May 2026 |
+County-level indicators were compiled from 11 federal sources:
+
+| Source | Tables / Dataset | Variables |
+|--------|-----------------|-----------|
+| U.S. Census ACS 5-Year (2019-2023) | S2701, S1701, S1901, B01003, B03003 | Youth uninsured rate, child poverty, median income, population, Hispanic % |
+| HRSA Area Health Resource File (2023) | AHRF | Mental health provider rate per 100K |
+| USDA Rural-Urban Continuum Codes (2023) | RUCC | Metro/non-metro county classification |
+| NSCH (National Survey of Children's Health) | 2022-2023 | Youth anxiety/depression diagnosis rate; caregiver access difficulty |
+| YRBSS (Youth Risk Behavior Surveillance System) | 2023 | Youth sadness/hopelessness prevalence |
+| BRFSS (Behavioral Risk Factor Surveillance System) | 2023 | Adult mentally unhealthy days |
+| NCANDS (National Child Abuse and Neglect Data System) | 2023 | Child maltreatment victim rate |
+
+Cross-validation / state-level context (not direct county variables):
+
+| Source | Purpose |
+|--------|---------|
+| SAHIE (Small Area Health Insurance Estimates) | Cross-validating ACS insurance coverage estimates |
+| SAIPE (Small Area Income and Poverty Estimates) | Cross-validating ACS poverty and income estimates |
+| SAMHSA NSDUH (2022-2023) | Contextual state-level prevalence benchmarks |
+| MHA (Mental Health America) State Rankings | State-level context on WA's overall MH landscape |
+
+### Variables
+
+| Variable | Description | Source |
+|----------|-------------|--------|
+| `Youth_Uninsured_Pct` | % of residents under 19 without health insurance | ACS S2701 |
+| `Child_Poverty_Pct` | % of residents under 18 below poverty line | ACS S1701 |
+| `Median_Income_K` | Median household income in thousands ($K) | ACS S1901 |
+| `Overall_Poverty_Pct` | % of all residents below poverty line | ACS S1701 |
+| `Is_Rural` | Binary rural classification (USDA RUCC: 1 = non-metro) | USDA RUCC |
+| `Population_K` | County population in thousands | ACS B01003 |
+| `MH_Providers_per100K` | Licensed mental health providers per 100K residents | HRSA AHRF |
+| `Hispanic_Pct` | % Hispanic/Latino population | ACS B03003 |
+| `Youth_MH_Diagnosis_Pct` | % of children 3-17 with current anxiety/depression diagnosis | NSCH |
+| `Youth_Sadness_Pct` | % of high schoolers with persistent sadness/hopelessness (2+ weeks) | YRBSS |
+| `Adult_MH_Days` | Avg mentally unhealthy days in past 30 days, adults | BRFSS |
+| `Child_Maltreatment_per1K` | Child maltreatment victims per 1,000 children | NCANDS |
 
 ### Data Evaluation
 
-The NSDUH dataset uses Small Area Estimation (SAE) with a hierarchical Bayes model. This is SAMHSA's most precise state-level estimation methodology — it combines direct survey estimates with model-based predictors to produce reliable figures even for smaller states with limited sample sizes. The six metrics per state cover AMI prevalence, AMI treatment rate, AMI unmet need rate, SMI prevalence, SUD prevalence, and SUD treatment rate.
+All data comes from federally administered surveys with established methodologies. ACS estimates use 5-year pooling (2019-2023) for county-level reliability, which is standard practice for small-area estimation. RUCC codes provide a binary metro/non-metro split — a simplification that trades granularity for interpretability across just 39 observations. NSCH and YRBSS data are survey-based with state-level samples allocated to counties using demographic weighting. BRFSS and NCANDS provide direct county-level estimates.
 
-The HRSA HPSA dataset uses a composite shortage score (0–25) that accounts for population-to-provider ratio, poverty rate, and travel distance to the nearest mental health provider. It is the authoritative federal metric for designating shortage areas and determines eligibility for NHSC loan repayment, J-1 visa waivers, and federal grant priority consideration.
+### Cleaning
 
-### Data Cleaning
-
-Both datasets were loaded as-is from federal sources — no imputation, no interpolation, no estimated values. Washington State's AMI prevalence (27.14%) and treatment rate (23.88%) were taken directly from SAMHSA's state-specific PDF rather than the multi-state summary table to ensure the highest available precision. The **treatment gap** throughout this project is calculated as:
-
-```
-treatment_gap = ami_prevalence_pct − ami_received_treatment_pct
-```
-
-A positive gap means more people have AMI than are receiving treatment. Negative gaps (observed in DC, NJ, MA, CT, VT, MN, NE, NY, MD) reflect cross-state care-seeking behavior captured by NSDUH's SAE model — residents of high-resource states seek care in other states, inflating the measured treatment rate above the in-state prevalence estimate. This is a documented methodological artifact, not a data error.
-
-### Data Quality Audit Results
-
-```sql
-Query 4 — Programmatic Audit
-  Total records      : 51
-  Null AMI prevalence: 0
-  Null AMI treatment : 0
-  Out-of-range prev  : 0
-  Out-of-range tx    : 0
-  Result             : PASS — zero violations
-```
-
-All 51 records passed all integrity checks. Dataset confirmed ready for grant-reportable analysis.
+No imputation or interpolation was performed by this project. County values were entered directly from published federal source tables. Note that NSCH and YRBSS figures are state-level survey estimates allocated to counties using demographic weighting — they are modeled approximations, not direct county-level measurements. All 39 counties have values for all 12 variables. The `Rural_Label` column is derived from `Is_Rural` for visualization purposes.
 
 ---
 
-## EDA + Analysis
+## Exploratory Data Analysis
 
 ### Summary Statistics
 
-| Metric | National Min | National Avg | National Max | Washington |
-|---|---|---|---|---|
-| AMI Prevalence (%) | 17.44 (NJ) | 22.99 | 28.87 (ME) | **27.14** |
-| AMI Treatment Rate (%) | 14.33 (TX) | 20.77 | 31.22 (DC) | **23.88** |
-| MH Treatment Gap (pp) | −11.07 (DC) | +2.20 | +8.66 (NV) | **+3.26** |
-| SUD Prevalence (%) | 9.90 (AL) | 18.64 | 25.88 (OR) | **20.23** |
-| SUD Treatment Gap (pp) | 6.08 (AL) | 14.05 | 20.21 (OR) | **15.55** |
-| AMI Unmet Need (%) | 36.4 (DC) | 52.0 | 61.8 (WY) | **51.2** |
+![Summary Statistics](outputs/summary_stats.png)
 
-**What this immediately tells us:** Washington has the 4th-highest AMI prevalence nationally — one of the most mentally ill adult populations in the country by this measure. Yet its treatment rate is only modestly above average. That gap between high need and insufficient coverage is the central finding of this entire analysis.
+The summary table shows considerable variation across Washington's 39 counties. Youth uninsured rates range from 0.0% (Garfield) to 8.9% (Skamania), while mental health provider density spans a 9.5x gap between the least-served county (Garfield, 40 per 100K) and the best-served (King, 380 per 100K). Median household income ranges from $35,800 (Whitman) to $106,300 (King). Youth MH diagnosis rates range from 16.2% (San Juan) to 26.4% (Yakima).
 
----
+### Distributions
 
-### Fig 1 — Treatment Gap by State: Top 20 (Washington Highlighted)
+![Distributions](outputs/distributions.png)
 
-![Top 20 States by Treatment Gap](outputs/fig1_treatment_gap_ranking.png)
+Youth uninsured rates are right-skewed, with most counties falling between 3-6% but a handful of agricultural counties pulling the tail above 7%. Child poverty shows a wider, more uniform spread. Provider density is bimodal — urban counties cluster above 200 per 100K while rural counties cluster below 150. Youth MH diagnosis rates center around 20% with a right tail driven by high-poverty rural counties. Youth sadness prevalence averages 43.8%, well above the national average of ~42%.
 
-Nevada, Wyoming, and Idaho dominate the top of the ranking with gaps exceeding 7 percentage points — driven by extreme rural provider shortages, limited state behavioral health infrastructure, and high rates of poverty among affected populations. Washington ranks 17th out of 51 jurisdictions, with a gap of 3.3 pp — above the national average of 2.2 pp and above both Pacific Northwest neighbors (Oregon ranks 10th at 4.7 pp; Idaho ranks 3rd at 7.4 pp).
+### Rural vs. Urban Disparities
 
-The states appearing at the bottom — Minnesota, Nebraska, Vermont, New York, Massachusetts, Connecticut, New Jersey, and DC — show negative gaps, meaning their measured treatment utilization exceeds their in-state AMI prevalence estimates. This is a documented artifact of NSDUH's SAE methodology: in high-resource states, residents frequently seek care across state lines, and that out-of-state treatment is still attributed to the home state in the survey. This does not indicate over-treatment; it indicates geographic care-seeking behavior. SAMHSA explicitly documents this in its methodology notes.
+![Rural vs Urban](outputs/rural_vs_urban.png)
 
----
+Box plots reveal consistent disadvantage across rural counties (26 of 39). Rural counties average fewer mental health providers, higher child poverty, and higher youth uninsured rates compared to the 13 urban counties. The provider gap is the most pronounced disparity.
 
-### Fig 2 — Washington vs. National Average
+### Provider Ranking
 
-![WA vs National Average](outputs/fig2_wa_vs_national.png)
+![Provider Ranking](outputs/top_bottom_providers.png)
 
-Washington's AMI prevalence (27.14%) is 4.15 percentage points above the national average (23.00%), yet its treatment rate (23.88%) is only 3.08 points above average (20.80%). This asymmetry — need growing faster than access — is the structural driver of Washington's above-average treatment gap. The state serves a high-prevalence population that consistently outpaces treatment capacity.
+A full ranking of all 39 counties by mental health provider density. The five most underserved counties — Garfield (40), Columbia (50), Wahkiakum (55), Skamania (70), and Ferry (75) — are all rural with populations under 13,000. The top five — King (380), Snohomish (290), San Juan (285), Whatcom (270), and Kitsap (265) — are predominantly urban or high-income.
 
-For a CCBHC in Washington, this chart provides the grant-narrative framing required in needs assessments: the problem is not just a low treatment rate, but a disproportionately large population in need relative to the care available. It directly supports arguments for expanded CCBHC capacity, workforce recruitment incentives, and targeted outreach in high-prevalence regions like Yakima.
+### Income vs. Provider Access
 
----
+![Income vs Providers](outputs/income_vs_providers.png)
 
-### Fig 3 — Washington County HPSA Scores: Top 10 (Yakima Highlighted)
+The strongest relationship in the dataset: median household income and mental health provider density correlate at r = 0.79. Bubble size represents county population. The scatter plot shows that wealthier counties tend to have more providers, while low-income rural counties face compounding disadvantages. King County is a clear outlier with both the highest income and highest provider rate.
 
-![WA County HPSA Scores](outputs/fig3_yakima_hpsa_rank.png)
+### Correlation Heatmap
 
-Yakima County's HPSA score of 19 out of 25 places it second in Washington, trailing only Ferry County (score 20). Seven of the ten counties shown — Ferry, Yakima, Pend Oreille, Stevens, Garfield, Lincoln, and Adams — meet or exceed HRSA's federal high-priority threshold of 16, qualifying for the full suite of federal shortage-area incentives.
+![Correlation Heatmap](outputs/heatmap.png)
 
-The HPSA composite score reflects three simultaneous pressures: population-to-provider ratio (Yakima has a large rural and agricultural population with few mental health providers), poverty rate (Yakima is among Washington's poorest counties by federal poverty thresholds), and travel distance to the nearest available care. A score of 19 means all three are severe at once. For CCBHC workforce planning, this directly supports NHSC site applications, J-1 visa waiver requests for international medical graduates, and priority scoring in SAMHSA grant competitions.
+The full correlation matrix across all 11 county-level variables surfaces several patterns. Income and providers show the strongest positive association (r = 0.79). Youth sadness and child poverty correlate at r = 0.96. Adult MH days and youth sadness track at r = 0.98 — communities where adults report more mentally unhealthy days are the same communities where youth report persistent sadness. Child maltreatment correlates strongly with poverty (r = 0.90) and inversely with income (r = -0.63). Hispanic population percentage correlates with youth uninsured rates (r = 0.68).
 
----
+### K-Means Clustering
 
-### Fig 4 — AMI Prevalence vs. Treatment Rate (All 51 Jurisdictions)
+![Clustering](outputs/clustering.png)
 
-![Prevalence vs Treatment Scatter](outputs/fig4_prevalence_vs_treatment.png)
+Counties are clustered into three risk profiles using a from-scratch K-means implementation (k=3) on standardized values of youth uninsured rate, child poverty, provider density, and median income. The three groups separate into lower-risk (low poverty, high providers), higher-risk (high poverty, low providers), and mixed/urban profiles. Bubble size represents population.
 
-This scatterplot shows the relationship between how many adults in each state have AMI and how many receive treatment. The dashed diagonal line represents perfect parity — zero treatment gap. States above it have more treatment than prevalence (negative gap); states below it have more need than care (positive gap).
+### Geographic Distribution
 
-**Key observations:**
+![GIS Map](outputs/gis_map.png)
 
-The correlation between prevalence and treatment rate is moderate (r ≈ 0.62), meaning higher prevalence does not reliably predict higher treatment access. States with similar prevalence rates can have very different treatment rates depending on provider supply, insurance coverage policy, and rural vs. urban population distribution. Washington falls well below the parity line — high prevalence, but treatment does not keep pace. This visualization makes the access gap tangible: Washington is not a state that lacks demand for behavioral health services. It is a state where demand far outpaces supply.
+A hex cartogram showing youth uninsured rates across all 39 counties. Eastern agricultural counties (Adams, Skamania, Grant, Franklin, Douglas) show the highest rates, while western urban counties (King, Island, San Juan) have the lowest. The geographic pattern closely mirrors the income and provider gradients seen in earlier figures.
 
-For a non-technical audience: every dot is a state. The higher the dot sits above the diagonal, the better that state is at getting people who need mental health care into treatment. Washington sits below the line, meaning it has more people who need care than it has people actually receiving it.
+### Youth MH Prevalence
 
----
+![Youth MH Prevalence](outputs/youth_mh_prevalence.png)
 
-### Fig 5 — Distribution of Mental Health Treatment Gaps
+Two-panel figure examining youth mental health outcomes. The left panel plots youth MH diagnosis rates (NSCH) against provider density, revealing a negative correlation (r = -0.41) — counties with fewer providers tend to show higher diagnosis rates, a pattern consistent with elevated unmet need in underserved areas, though poverty and other correlated factors cannot be excluded. The right panel shows youth sadness prevalence (YRBSS) vs. child poverty, with the strongest association in the dataset between a socioeconomic indicator and a mental health outcome (r = 0.96).
 
-![Gap Distribution](outputs/fig5_gap_distribution.png)
+### Child Maltreatment Analysis
 
-The histogram shows where all 51 jurisdictions fall on the spectrum from best (lowest gap) to worst (highest gap). The distribution is roughly bell-shaped with a slight right skew — most states cluster between 0 and 4 pp — with a tail of high-gap outliers (Nevada, Wyoming, Texas, Idaho, Tennessee) in the 6–8 pp range.
+![Maltreatment Analysis](outputs/maltreatment_analysis.png)
 
-Washington's 3.3 pp gap is highlighted in red. It sits just above the national mean of 2.2 pp, comfortably in the upper half of the distribution. The key takeaway is not that Washington is among the worst states — it is not — but that its high AMI prevalence means the **absolute number of people** falling into that gap is substantially larger than a mid-tier gap percentage suggests. Washington's 27% prevalence rate applied to a population of roughly 5.7 million adults means hundreds of thousands of people with a diagnosable mental illness who are not receiving care.
+County rankings by child maltreatment rate (NCANDS) alongside poverty correlation. Yakima (17.2 per 1K), Ferry (16.2), and Okanogan (15.5) have the highest rates. Maltreatment correlates strongly with child poverty (r = 0.90) and inversely with income (r = -0.63), consistent with economic stress as a significant risk factor.
 
----
+### Caregiver Access Barriers
 
-### Fig 6 — Mental Health vs. Substance Use Disorder Gaps (Top 12 States)
+![Caregiver Access Barriers](outputs/caregiver_access_barriers.png)
 
-![MH vs SUD Gaps](outputs/fig6_mh_vs_sud_gaps.png)
-
-This grouped bar chart reveals a consistent and important pattern across all high-gap states: the SUD treatment gap is not just worse than the MH gap — it is 2 to 5 times worse. In Washington, the MH gap is 3.3 pp. The SUD gap is 15.6 pp. That means for every person with a mental health condition who is not getting care, there are roughly five people with a substance use disorder who aren't getting care.
-
-This matters directly for CCBHCs, which are federally required to serve both MH and SUD populations and must document unmet need for each population separately under SAMHSA certification criteria. The SUD gap cannot be explained away by cross-state care-seeking effects — it reflects a genuine and severe shortage of SUD treatment capacity across the country. States that rank highly on MH gaps almost universally rank worse on SUD gaps, suggesting shared structural drivers: rural location, provider shortage, poverty, and insurance access barriers.
+State-level survey data from NSCH (Indicator 4.4a, 2022–2023) reveals that **70.6% of Washington caregivers who sought mental health care for their children reported difficulty obtaining it**. Only 29.5% said the process was not difficult, while 33.8% found it somewhat difficult, 29.4% very difficult, and 7.4% said it was not possible. Applying this rate to Washington's estimated population of families who sought youth mental health care yields roughly 183,000 families encountering barriers — a figure derived from NSCH population weights, not a direct count. Washington's 70.6% difficulty rate exceeds the national average of 55.0% by 15.6 percentage points, placing Washington substantially above the national average on this measure.
 
 ---
 
-### Fig 7 — Unmet Mental Health Need: Top 20 States
+## Key Findings
 
-![Unmet Need Ranking](outputs/fig7_unmet_need_ranking.png)
+1. **70.6% of caregivers report difficulty accessing youth MH care.** Among Washington families who sought mental health care for their children, 70.6% reported some form of difficulty (NSCH 2022–2023). This is 15.6 percentage points above the national average of 55.0%, representing roughly 183,000 families encountering barriers.
 
-The `ami_unmet_need_pct` metric measures the share of adults *who already have AMI* and still do not receive any mental health treatment. It is a different lens from the treatment gap: instead of comparing prevalence to treatment rates, it asks directly — of the people who are sick, what fraction gets no care at all?
+2. **Rural-urban provider gap.** Rural counties average 127 providers per 100K vs. 225 in urban counties — a gap of 99 fewer providers per 100K affecting 26 of 39 counties.
 
-Nationally, more than half of all adults with AMI go without any treatment in a given year. Washington's unmet need rate of 51.2% means roughly half of all Washington adults with AMI receive no treatment — consistent with the national average despite Washington's progressive health policy reputation. The states with the lowest unmet need (lower end of the chart) are generally high-resource, high-insurance-coverage states — Vermont, Rhode Island, Maine, Massachusetts — where state investment in behavioral health, Medicaid expansion generosity, and higher provider density combine to improve access.
+3. **Income and provider access are strongly correlated.** Median household income and provider density correlate at r = 0.79, the strongest relationship in the dataset. Wealthier counties tend to have more providers.
 
-**For a non-technical audience:** In Washington, if you put 100 people with a mental illness in a room, about 51 of them will not see a therapist, psychiatrist, or counselor all year. That is the problem this analysis quantifies.
+4. **Poverty and youth sadness are closely linked.** Child poverty and youth sadness/hopelessness correlate at r = 0.96, the tightest association between any socioeconomic factor and a mental health outcome in this dataset. Adult and youth mental health burden also track closely (r = 0.98), suggesting that youth and adult mental health burden are tightly linked at the community level, and that interventions focused exclusively on youth may overlook co-occurring adult mental health needs.
 
----
+5. **Child maltreatment follows poverty.** Maltreatment rates correlate with child poverty at r = 0.90 and inversely with income at r = -0.63. Yakima (17.2/1K), Ferry (16.2), and Okanogan (15.5) have the highest rates.
 
-### Fig 8 — Washington County HPSA Scores vs. Designated Population
+6. **Five critical provider-shortage counties.** Garfield (40 providers/100K), Columbia (50), Wahkiakum (55), Skamania (70), and Ferry (75) represent the most acute access deserts — all rural, all with populations under 13,000.
 
-![HPSA Bubble Chart](outputs/fig8_hpsa_bubble.png)
+7. **Uninsured rate extremes.** Skamania (8.9%), Adams (8.2%), and Franklin/Douglas (7.3%) have the highest youth uninsured rates, an 8.9 percentage point gap compared to the lowest.
 
-This bubble chart adds a population dimension to the HPSA score ranking. Bubble size represents the number of people in each county who fall under the HPSA designation — the population without adequate mental health provider access. The combination of score (shortage severity) and bubble size (scale of the problem) reveals where the burden is largest.
+8. **Demographic barriers.** Hispanic population percentage correlates with youth uninsured rates (r = 0.68), pointing to enrollment barriers in communities like Adams (69% Hispanic, 8.2% uninsured) and Franklin (56% Hispanic, 7.3% uninsured).
 
-Yakima County is notable on both dimensions: a high score (19/25) and a large designated population (256,000 people). Thurston County has a lower score (6/25) but an enormous designated population (312,500), reflecting a large suburban county where shortage is less severe but still affects a very large number of people. Ferry County has the highest score (20/25) but a tiny population (8,500), reflecting extreme rural shortage with limited scale. For CCBHC planning purposes, Yakima presents the most acute combination of severity and scale — the largest high-priority shortage in Washington State.
+9. **Youth MH diagnosis paradox.** Counties with fewer providers show higher diagnosis rates (r = -0.41), a pattern consistent with elevated mental health need in high-poverty areas where provider access is limited.
 
----
-
-### What the Data Is Telling Us
-
-Taken together, these eight charts tell a consistent story:
-
-**Washington is a high-need, under-resourced state for behavioral health.** Its AMI prevalence is in the top 10 nationally, but its treatment infrastructure has not kept pace with that need. The result is a 3.3 pp mental health treatment gap and a 15.6 pp SUD treatment gap — both above the national averages for their respective domains.
-
-**The geographic dimension of this problem is concentrated in rural eastern Washington.** Yakima, Ferry, Pend Oreille, Stevens, Garfield, Adams, and Lincoln counties all score at or above the federal high-priority HPSA threshold. These are agricultural, rural, and lower-income counties where the combination of provider shortage, poverty, and distance creates compound barriers to access.
-
-**The SUD crisis is being systematically under-addressed.** Across every high-gap state, the substance use disorder treatment gap dwarfs the mental health gap. Washington's SUD gap of 15.6% means roughly 1 in 6 Washington adults with a substance use disorder receives no treatment in a given year. For CCBHCs — which are required to serve both populations — this represents the single largest area of unmet service demand.
-
-**More than half of people with AMI go without care.** A 51.2% unmet need rate is not a policy success. Despite Washington's Medicaid expansion, behavioral health integration initiatives, and relatively high per-capita healthcare spending, the majority of people with diagnosable mental illness remain untreated.
+10. **Youth MH prevalence.** State average of 20.8% of children 3-17 have an anxiety/depression diagnosis (NSCH), with Yakima (26.4%), Okanogan (25.2%), and Ferry (24.1%) highest.
 
 ---
 
-### Validating Official Claims Against the Data
+## Limitations
 
-#### SAMHSA Claims
+**Survey estimates, not direct counts.** NSCH, YRBSS, BRFSS, and NSDUH data are survey-based estimates — not direct counts of individuals or events. They reflect modeled population-level figures with associated uncertainty that is not propagated through this analysis.
 
-**Claim:** "More than half of U.S. adults with Any Mental Illness did not receive mental health services in the past year." *(SAMHSA, 2022 NSDUH National Report)*
+**County-level NSCH and YRBSS values are derived from state-level surveys.** The National Survey of Children's Health and Youth Risk Behavior Surveillance System collect data at the state level. County-level figures used in this project are allocated using demographic weighting. These should be interpreted as modeled approximations describing estimated patterns across counties, not direct measurements from county-level samples.
 
-**Data verdict: Confirmed.** The national average `ami_unmet_need_pct` across all 51 jurisdictions in this dataset is 52.0%. Washington's figure is 51.2%. SAMHSA's headline claim understates the problem in high-gap states like Wyoming (61.8% unmet need) and Texas (61.2%), but accurately reflects the national pattern.
+**HRSA provider rates measure supply, not availability.** Provider density (HRSA AHRF) reflects counts of licensed providers relative to population. It does not indicate whether providers are accepting new patients, what populations or conditions they serve, current wait times, or actual clinic capacity. High provider counts do not guarantee accessible care.
 
-**Claim:** SAMHSA's 2021–2022 NSDUH report states that AMI prevalence among U.S. adults is approximately 22–23%.
+**All correlations in this analysis are descriptive.** This is an observational cross-sectional analysis of 39 counties. Correlation coefficients — including strong ones like r = 0.96 — identify co-occurrence patterns. They do not establish causation, directionality, or the absence of confounding variables.
 
-**Data verdict: Confirmed.** The national average AMI prevalence across all 51 jurisdictions in this dataset is 22.98% — precisely within the range SAMHSA reports nationally. Washington's 27.14% is a statistically significant outlier above this national average, as documented in SAMHSA's own state-specific PDF.
+**Small analytical sample.** With n = 39 counties, individual outlier counties carry substantial leverage on correlation coefficients. Findings are appropriate for pattern description and prioritization — not for formal statistical inference or broad generalization.
 
-#### HRSA Claims
+**K-means clustering parameters were analyst-specified.** The three-cluster solution (k = 3) and the four input variables were selected by the analyst. The clusters are descriptively useful for segmenting counties but have not been validated against external risk classifications.
 
-**Claim:** HRSA designates Yakima County as a Mental Health Health Professional Shortage Area with a score of 19/25, making it one of the most severely shortage-designated counties in Washington State.
+**Dataset year heterogeneity.** Variables span survey years from 2019 through 2023 (ACS 5-year: 2019–2023; NSCH, YRBSS, BRFSS, NCANDS: 2022–2023; RUCC: 2023). Some relationships may reflect period-specific conditions rather than stable structural patterns.
 
-**Data verdict: Confirmed and contextualized.** The HRSA HPSA database confirms Yakima's score of 19/25 — the second highest in Washington, behind only Ferry County (20/25). Of Washington's 30 designated counties, 7 meet or exceed the federal high-priority threshold of 16. HRSA's characterization of Yakima as a high-severity shortage area is directly supported by the data.
-
-**Claim:** HRSA states that HPSA scores ≥ 16 qualify for federal high-priority shortage designation, unlocking NHSC loan repayment and J-1 visa waiver eligibility.
-
-**Data verdict: Confirmed.** This threshold is applied as-is in the analysis. Seven Washington counties meet it: Ferry (20), Yakima (19), Pend Oreille (18), Stevens (17), Garfield (17), Lincoln (16), and Adams (16).
-
-#### Washington State / Yakima Context
-
-**Claim:** Washington State health agencies and Yakima Valley Farm Workers Clinic program documentation identify Yakima County as facing compound behavioral health access barriers: high agricultural population, elevated poverty, rural geography, and bilingual/bicultural service gaps.
-
-**Data verdict: Supported.** Yakima's HPSA score of 19 is calculated by HRSA using precisely the metrics that reflect these conditions: population-to-provider ratio (reflecting provider shortage relative to the large rural population), poverty rate (reflecting Yakima's elevated federal poverty rate), and travel time (reflecting geographic distance from urban mental health services). The score operationalizes the compound barriers documented by local health agencies.
-
-#### Federal CCBHC Program
-
-**Claim:** SAMHSA's CCBHC certification criteria require clinics to serve both mental health and substance use disorder populations, and to document unmet need in their service area as part of grant compliance.
-
-**Data verdict: The data directly supports the program rationale.** Washington's 3.3 pp MH gap and 15.6 pp SUD gap — both above the national averages — constitute exactly the kind of documented unmet need that CCBHC needs assessments are designed to capture. The HPSA data for Yakima further supports the workforce shortage rationale behind CCBHC workforce incentive provisions. The five SQL queries in this project map directly to the data documentation requirements in SAMHSA's CCBHC Program Guidance: gap analysis, comparative benchmarking, multi-condition coverage, data quality validation, and shortage-area documentation.
+**This analysis supports planning and prioritization, not clinical decisions.** Outputs are appropriate for informing resource allocation, grant narrative development, and community needs assessments. They are not validated clinical tools and should not be used to make individual-level determinations about mental health need, provider adequacy, or program eligibility.
 
 ---
 
-### Answering the Main Questions
+## Recommendations
 
-**1. Where does Washington rank nationally for unmet mental health need?**
-Washington ranks 17th out of 51 jurisdictions for mental health treatment gap (3.3 pp). It ranks in the upper half of the unmet need distribution, with a 51.2% unmet need rate equal to the national average despite its above-average prevalence.
+1. **Target provider recruitment in the five critical counties** — Garfield, Columbia, Wahkiakum, Skamania, and Ferry lack the population base to sustain private-practice models. Telehealth subsidies or state-funded provider rotations could bridge the gap.
 
-**2. What drives Washington's above-average treatment gap?**
-The gap is not driven by an unusually low treatment rate — Washington's 23.88% treatment rate is above the national average (20.77%). It is driven by an unusually high prevalence rate (27.14%, 4th highest nationally) that treatment capacity has not kept pace with. Washington has more people in need than its treatment infrastructure can serve.
+2. **Expand insurance outreach in high-Hispanic communities** — The correlation between Hispanic population share and youth uninsured rates suggests language and documentation barriers to enrollment, not lack of eligibility. Bilingual navigators and community-based enrollment drives should be prioritized in Adams, Franklin, Grant, and Yakima counties.
 
-**3. How severe is the provider shortage in Yakima County?**
-Yakima County's HPSA score of 19/25 places it in the top 7% of shortage-designated counties in Washington. With a designated population of 256,000 people and a score reflecting simultaneous pressure from provider shortage, poverty, and geographic distance, Yakima represents the most actionable target for CCBHC expansion, NHSC recruitment, and federal workforce incentive programs in the state.
+3. **Use clustering to prioritize funding** — The three risk profiles identified by K-means can guide tiered resource allocation: higher-risk counties need crisis-level intervention, mixed counties need targeted support, and lower-risk counties need maintenance funding.
 
-**4. Do federal claims hold up against the data?**
-Yes — with nuance. SAMHSA's national claims about unmet need are confirmed and in some cases understate the problem in high-gap states. HRSA's HPSA designations for Washington are confirmed and directly usable for workforce planning. The CCBHC program rationale is fully supported by the gap data.
+4. **Invest in rural infrastructure** — The consistent rural disadvantage across providers, poverty, and insurance coverage reflects systemic underinvestment. Broadband expansion for telehealth, loan forgiveness for rural mental health professionals, and mobile crisis teams would address root causes.
 
----
+5. **Address the caregiver access crisis** — With 70.6% of families reporting difficulty and a 15.6-point gap above the national average, Washington needs systemic reforms: shorter wait times, expanded telehealth, streamlined referral pathways, and family navigators to reduce the burden of accessing care.
 
-### Recommendations
-
-Based on the data, five recommendations are directly supported:
-
-**1. Prioritize CCBHC expansion in Yakima, Stevens, Pend Oreille, and Garfield counties.** All four have HPSA scores ≥ 17, meaning shortage severity is extreme. A CCBHC serving these areas qualifies for the full suite of federal shortage-area incentives and can document need using exactly the data in this project.
-
-**2. Build SUD capacity alongside MH capacity — not as an afterthought.** Washington's SUD treatment gap (15.6%) is nearly five times its MH gap (3.3%). Any behavioral health initiative that focuses exclusively on mental health while underfunding SUD treatment is addressing a fraction of the actual unmet need.
-
-**3. Use HPSA score and designated population together for priority-setting.** Score alone (shortage severity) and population alone (scale) tell different stories. Yakima presents the optimal combination: high severity *and* large scale. Ferry County has the highest score but the smallest designated population — meaningful for targeted provider recruitment but lower programmatic impact than Yakima.
-
-**4. Address the AMI prevalence-treatment gap asymmetry at the state level.** Washington's treatment rate is above average, but its prevalence is growing faster than access. State-level investment in telehealth, school-based mental health services, and integrated primary care behavioral health — particularly in high-prevalence rural counties — is needed to close the structural gap.
-
-**5. Standardize data quality audits as pre-submission requirements for federal reporting.** The zero-violation audit in Query 4 confirms dataset integrity for this project. CCBHCs submitting federal demonstration grant reports should run equivalent programmatic checks before submission to prevent data quality flags that delay reimbursement or grant renewals.
+6. **Prioritize child maltreatment prevention in high-poverty counties** — Yakima, Ferry, and Okanogan should receive targeted family support services, as maltreatment rates track poverty at r = 0.90.
 
 ---
 
-## Repo Structure
+## Relevance to WSCC
 
-```
-behavioral-health-access-wa/
-├── README.md
-├── Code.py                          ← all code: DB build, SQL queries, all 8 charts
+This project was completed as part of a Spring 2026 internship with **Washington State Community Connectors (WSCC)**, an organization dedicated to bridging gaps in health and social services across Washington's rural and underserved communities.
+
+The analysis maps directly to WSCC's mission and operational needs:
+
+- **Geographic targeting** — The county-level maps and provider rankings identify where youth mental health services are most lacking, supporting WSCC's outreach resource allocation and grant narrative development.
+- **Risk segmentation** — The K-means clustering groups counties into actionable risk tiers that align with how state agencies and nonprofits prioritize intervention — distinguishing between counties that need more providers, more insurance enrollment support, or both.
+- **Evidence-based advocacy** — The correlation analysis quantifies the relationships between poverty, insurance coverage, provider access, youth sadness, and child maltreatment — the factors WSCC tracks when measuring whether programs are reaching the populations most at risk.
+- **Caregiver access data** — The 70.6% caregiver difficulty finding from NSCH provides a compelling data point for grant narratives and advocacy materials, directly illustrating the problem WSCC works to solve.
+
+This project demonstrates the end-to-end data workflow involved in community health analytics: sourcing federal datasets, integrating multiple data streams at the county level, applying statistical and machine learning techniques, and producing outputs that directly support program planning.
+
+---
+
+## Repository Structure
+
+youth-mental-health-wa/
+├── Code.py                          # Full analysis script (all data embedded)
 ├── data/
-│   ├── nsduh_state_estimates.csv    ← all 51 states, 8 behavioral health metrics
-│   └── hrsa_hpsa_wa.csv             ← 30 WA county HPSA designations
-└── outputs/
-    ├── treatment_gap_by_state.csv   ← all 51 states ranked by treatment gap
-    ├── wa_vs_national.csv           ← 2-row WA vs. national comparison
-    ├── yakima_shortage_rank.csv     ← WA counties ranked by HPSA score
-    ├── fig1_treatment_gap_ranking.png
-    ├── fig2_wa_vs_national.png
-    ├── fig3_yakima_hpsa_rank.png
-    ├── fig4_prevalence_vs_treatment.png
-    ├── fig5_gap_distribution.png
-    ├── fig6_mh_vs_sud_gaps.png
-    ├── fig7_unmet_need_ranking.png
-    └── fig8_hpsa_bubble.png
-```
+│   └── sources.md                   # Dataset documentation and download links
+├── outputs/
+│   ├── summary_stats.png            # Fig 1: Summary statistics table
+│   ├── distributions.png            # Fig 2: Variable distributions (2x3)
+│   ├── rural_vs_urban.png           # Fig 3: Rural vs urban box plots
+│   ├── top_bottom_providers.png     # Fig 4: Provider density ranking
+│   ├── income_vs_providers.png      # Fig 5: Income vs providers (r = 0.79)
+│   ├── heatmap.png                  # Fig 6: Correlation matrix (11 variables)
+│   ├── clustering.png               # Fig 7: K-means risk profiles (k=3)
+│   ├── gis_map.png                  # Fig 8: Hex cartogram
+│   ├── youth_mh_prevalence.png      # Fig 9: Youth MH diagnosis & sadness
+│   ├── maltreatment_analysis.png    # Fig 10: Child maltreatment rankings
+│   └── caregiver_access_barriers.png # Fig 11: Caregiver access difficulty (NSCH)
+├── requirements.txt
+├── LICENSE
+└── .gitignore
 
 ---
 
-## Running the Analysis
+## How to Run
 
 ```bash
-pip install matplotlib numpy
+pip install pandas numpy matplotlib seaborn
 python Code.py
 ```
 
-The script builds `behavioral_health.db` in the working directory, prints all five SQL query results to stdout, exports output CSVs, and saves all eight charts to `outputs/`.
+All 11 figures are saved to `outputs/`. No external data files are needed — the county data is embedded in the script.
 
 ---
 
-## Skills Demonstrated
+## Copyright
 
-Relational database design · multi-table SQL queries with window functions · federal health data sourcing and interpretation · data quality auditing · population-level gap analysis · EDA and data visualization · CCBHC reporting context · validation of official agency claims against primary data · communication to non-technical audiences
+© 2026 Waleed Adawi. All rights reserved.
 
----
+This project and its contents are shared for portfolio and educational purposes. Developed during a Spring 2026 internship with Washington State Community Connectors (WSCC). Data sourced from U.S. Census Bureau (ACS), HRSA, USDA, NSCH, YRBSS, BRFSS, and NCANDS — all publicly available federal datasets. See [`data/sources.md`](data/sources.md) for full citations.
 
-*© 2026 Waleed Adawi. This project and its contents — including all code, analysis, visualizations, and written documentation — are the original work of the author. All federal datasets used are in the public domain and sourced from SAMHSA and HRSA. Reproduction or redistribution of this work requires attribution.*
+Licensed under the [MIT License](LICENSE).
